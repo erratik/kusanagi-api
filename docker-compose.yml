@@ -1,5 +1,6 @@
 version: '3'
 
+
 services:
 
   # Data API and authentication/authorization
@@ -8,14 +9,17 @@ services:
     build:
       context: ./
       args:
-        NODE_ENV: development
+        NODE_ENV: test
     hostname: api
+    links:
+      - init
     depends_on:
-      - db
       - redis
+      - init
     environment:
       - CORS_ORIGIN=http://localhost:3000,http://localhost:3001
-      - DATABASE_URL=postgres://postgres@db:5432/dev
+      # - DATABASE_URL=postgres://postgres@db:5432/dev
+      - DATABASE_URL=mongodb://erratik:kaya80ate@127.0.0.1/datawhore
       - DATABASE_DEBUG=false
       - REDIS_URL=redis://redis:6379/0
       - SESSION_SECRET=wZjwhFtzQsd7r87W6AZw45Sm
@@ -27,8 +31,8 @@ services:
       - TWITTER_SECRET=xxxxx
     ports:
       - "8080:8080"
-      - "127.0.0.1:9229:9229" # V8 inspector for tools/run.js
-      - "127.0.0.1:9230:9230" # V8 inspector for src/server.js
+      - "0.0.0.0:9229:9229" # V8 inspector for tools/run.js
+      - "0.0.0.0:9230:9230" # V8 inspector for src/server.js
     volumes:
       - yarn:/home/node/.cache/yarn
       - ./build:/usr/src/app/build
@@ -45,28 +49,81 @@ services:
       - ./yarn.lock:/usr/src/app/yarn.lock
     command: node tools/run.js # or, `node --inspect=0.0.0.0:9229 tools/run.js`
 
-  # SQL and document data store
-  db:
-    image: postgres:9.6.6-alpine
-    read_only: true
-    tmpfs:
-      - /tmp
-      - /var/run/postgresql
-    volumes:
-      - db:/var/lib/postgresql/data
-      - ./postgres-initdb.sh:/docker-entrypoint-initdb.d/initdb.sh
+  # MongoDB and document data store
+  init:
+    container_name: init
+    image: erratik/kusanagi-init
+    environment:
+      - MONGO_LOCAL_STORAGE=/Users/erratik/Sites/_mongod/data
     ports:
-      - "127.0.0.1:5432:5432" # you can override it via docker-compose.override.yml
+      - "27017:27017"
+    networks:
+      mongo_net:
+        ipv4_address: 172.16.0.2
+    command: ./run.sh
+
+
+  mongo_backup:
+    container_name: mongo_backup
+    image: mongo:3.2.10
+    volumes:
+      - mongo:/data/heroku_10tzj082
+    command: "mongodump --host=ds161960.mlab.com:61960 --db=heroku_10tzj082  -u tay -p abyss  -o /data"
+
+  mongo_restore:
+    container_name: mongo_restore
+    image: mongo:3.2.10
+    links:
+      - init
+    depends_on:
+      - init
+      - mongo_backup
+    volumes:
+      - mongo:/data/heroku_10tzj082
+    networks:
+      mongo_net:
+    command: "mongorestore --host=172.16.0.2 -d datawhore -u erratik -p kaya80ate /data/heroku_10tzj082"
+
+  # portainer:
+  #   image: portainer/portainer
+  #   container_name: "portainer"
+  #   command: --templates http://templates/templates.json -d /data -H tcp://localhost:27017
+  #   networks:
+  #     - local
+
+  # SQL and document data store
+  # db:
+  #   image: postgres:9.6.6-alpine
+  #   read_only: true
+  #   tmpfs:
+  #     - /tmp
+  #     - /var/run/postgresql
+  #   volumes:
+  #     - db:/var/lib/postgresql/data
+  #     - ./postgres-initdb.sh:/docker-entrypoint-initdb.d/initdb.sh
+  #   ports:
+  #     - "127.0.0.1:5432:5432" # you can override it via docker-compose.override.yml
 
   # Distributed in-memory cache
   redis:
     image: redis:4.0.6-alpine
     read_only: true
+    networks:
+      mongo_net:
+    depends_on:
+      - mongo_backup
     volumes:
       - redis:/data
     user: redis
 
 volumes:
-  db:
   redis:
   yarn:
+  mongo:
+
+networks:
+  mongo_net:
+    driver: bridge
+    ipam:
+      config:
+      - subnet: 172.16.0.0/24
