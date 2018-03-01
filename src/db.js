@@ -7,7 +7,45 @@
 
 /* @flow */
 
+const MongoClient = require('mongodb').MongoClient;
+const Server = require('mongodb').Server;
+
+const server = new Server(process.env.HOSTNAME, process.env.PORT);
+const mongoClient = new MongoClient(server, { native_parser: true });
+
+const options = {
+  reconnectTries: Number.MAX_VALUE, // Never stop trying to reconnect
+  reconnectInterval: 500, // Reconnect every 500ms
+  poolSize: 10, // Maintain up to 10 socket connections
+  // If not connected, return errors immediately rather than waiting for reconnect
+  bufferMaxEntries: 0,
+};
+const url = process.env.DATABASE_URL;
+
+function open() {
+  // Connection URL. This is where your mongodb server is running.
+  return mongoClient.connect(url, options, (resolve, reject) => {
+    if (resolve) {
+      reject(reject);
+    } else {
+      resolve(resolve);
+    }
+  });
+}
+
+function close(db: any) {
+  // Close connection
+  if (db) {
+    db.close();
+  }
+}
+
+const db = { open, close };
+
+export default db;
+
 // import knex from 'knex';
+
 // const db = knex({
 //   client: 'pg',
 //   connection: process.env.DATABASE_URL,
@@ -17,31 +55,60 @@
 //   debug: process.env.DATABASE_DEBUG === 'true',
 // });
 
-// import mongoose from 'mongoose';
-const mongodb = require('mongodb');
+// const MongoClient = require('mongodb').MongoClient;
+// const Server = MongoClient.Server;
 
-const db = {};
+// const url = process.env.DATABASE_URL;
 
-async function init() {
-  db = await mongodb.MongoClient.connect('process.env.DATABASE_URL');
+// const server = new Server(process.env.HOSTNAME, process.env.PORT);
+// const client = new MongoClient(server, { native_parser: true });
 
-  await db.collection('Movies').drop();
-  await db
-    .collection('Movies')
-    .insertMany([
-      { name: 'Enter the Dragon' },
-      { name: 'Ip Man' },
-      { name: 'Kickboxer' },
-    ]);
+// // mongoDB
+// //   .then(db => {
+// //     // db as first argument
+// //     console.log(db);
+// //   })
+// //   .catch(err => ({ error: err, reason: {} }));
 
-  // Don't `await`, instead get a cursor
-  // const cursor = db.collection('Movies').find();
-  // Use `next()` and `await` to exhaust the cursor
-  // for (let doc = await cursor.next(); doc != null; doc = await cursor.next()) {
-  //   console.log(doc.name);
-  // }
-}
+// // Open the connection to the server
+// client.open((err, mongoclient) => {
+//   // Get the first db and do an update document on it
+//   const db = mongoclient.db('datawhore');
+//   db
+//     .collection('system.users')
+//     .find({}, (err, result) => {
+//       // assert.equal(null, err);
+//       // assert.equal(1, result);
+//     });
+// });
 
-init();
+// async function asyncCall() {
+//   console.log('calling');
+//   const result = await mongoDB();
+//   console.log(result);
+//   return result;
+//   // expected output: "resolved"
+// }
 
-export default db;
+// const db = asyncCall();
+
+// export default db;
+
+// // const db = mongodb.MongoClient.connect(process.env.DATABASE_URL, config)
+// //   .then(res => res)
+// //   .catch(err => err);
+// // function resolveAfter2Seconds() {
+// //   return new Promise(resolve => {
+// //     setTimeout(() => {
+// //       resolve('resolved');
+// //     }, 2000);
+// //   });
+// // }
+
+// // const mongoToKnex = require('mongo-to-knex');
+
+// // // knex main object
+// // const knex = require('knex')({ /* knex config */ });
+
+// // // knex query builder object
+// // const knexQuery = knex('movies');

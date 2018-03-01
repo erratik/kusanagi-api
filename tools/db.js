@@ -7,20 +7,14 @@
  */
 
 // const fs = require('fs');
-// const knex = require('knex');
+const knex = require('knex');
 const task = require('./task');
 
 // The list of available commands, e.g. node tools/db.js rollback
 const commands = ['version', 'migrate', 'rollback', 'migration', 'seed'];
 const command = process.argv[2];
 
-// const config = {
-// 	client: 'pg',
-// 	connection: process.env.DATABASE_URL,
-// 	migrations: {
-// 		tableName: 'migrations'
-// 	}
-// };
+const config = {};
 
 // The template for database migration files (see templates/*.js)
 // const version = new Date().toISOString().substr(0, 16).replace(/\D/g, '');
@@ -37,28 +31,30 @@ module.exports = task('db', async () => {
 
   try {
     switch (command) {
-      case 'version':
-        // db = knex(config);
-        // await db.migrate.currentVersion(config).then(console.log);
-        break;
-      case 'migration':
-        // fs.writeFileSync(`migrations/${version}_${process.argv[3] || 'new'}.js`, template, 'utf8');
-        break;
-      case 'rollback':
-        // db = knex(config);
-        // await db.migrate.rollback(config);
-        break;
-      case 'seed':
-        // db = knex(config);
-        // await db.seed.run(config);
-        break;
+      // case 'version':
+      //   console.log('Migrate a current version of the db');
+      //   // https://github.com/seppevs/migrate-mongo
+      //   // db = knex(config);
+      //   // await db.migrate.currentVersion(config).then(console.log);
+      //   break;
+      // case 'migration':
+      //   // fs.writeFileSync(`migrations/${version}_${process.argv[3] || 'new'}.js`, template, 'utf8');
+      //   break;
+      // case 'rollback':
+      //   // db = knex(config);
+      //   // await db.migrate.rollback(config);
+      //   break;
+      // case 'seed':
+      //   // db = knex(config);
+      //   // await db.seed.run(config);
+      //   break;
       default:
-      // db = knex(config);
-      // await db.migrate.latest(config);
+        db = knex(config);
+        await db;
     }
   } finally {
     if (db) {
-      // await db.destroy();
+      await db.destroy();
     }
   }
 });

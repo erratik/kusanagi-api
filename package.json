@@ -69,14 +69,6 @@
   "jest": {
     "setupTestFrameworkScriptFile": "<rootDir>/tools/jest.setup.js"
   },
-  "lint-staged": {
-    "*.js": [
-      "git add --force"
-    ],
-    "*.json": [
-      "git add --force"
-    ]
-  },
   "scripts": {
     "lint": "eslint --ignore-path .gitignore --ignore-pattern \"!**/.*\" .",
     "fix": "eslint --ignore-path .gitignore --ignore-pattern \"!**/.*\" --fix .",

@@ -1,7 +1,9 @@
 FROM node:8.9.3-alpine
 
 ARG NODE_ENV=production
-ENV NODE_ENV=$NODE_ENV
+ARG NODE_ENV=$NODE_ENV
+ENV PORT=$PORT
+ENV HOSTNAME=$HOSTNAME
 
 # Set a working directory
 WORKDIR /usr/src/app
