@@ -18,5 +18,6 @@ module.exports = {
   rules: {
     'prettier/prettier': ['error', prettierOptions],
     'flowtype/define-flow-type': 1,
+    'no-plusplus': 'off',
   },
 };

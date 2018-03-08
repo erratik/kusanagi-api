@@ -13,6 +13,7 @@ services:
   init:
     container_name: init
     image: erratik/kusanagi-init
+    user: mongodb:mongodb
     restart: always
     environment:
       - MONGO_LOCAL_STORAGE=/Users/erratik/Sites/_mongod/data
@@ -21,32 +22,34 @@ services:
         ipv4_address: 172.16.0.2
     ports:
       - "27017:27017"
+    volumes:
+      - mongo:/data:rw
     command: ./run.sh
 
 
   mongo_backup:
     container_name: mongo_backup
+    user: mongodb:mongodb
     image: mongo
     depends_on:
       - init
     networks:
       mongo_net:
     volumes:
-      - mongo:/data/heroku_10tzj082
-    command: mongodump --db datawhore -u erratik -p kaya80ate /data
-    # command: ./run.sh
+      - mongo:/data:rw
+    command: mongodump -h ds161960.mlab.com:61960 -d heroku_10tzj082 -u erratik -p kaya80ate --authenticationDatabase=heroku_10tzj082 -o /data
 
   mongo_restore:
     container_name: mongo_restore
+    user: mongodb:mongodb
     image: mongo
     depends_on:
-      - init
       - mongo_backup
     networks:
       mongo_net:
     volumes:
-      - mongo:/data/heroku_10tzj082
-    command: mongorestore --host=172.16.0.2 --db datawhore -u erratik -p kaya80ate /data/heroku_10tzj082
+      - mongo:/data:rw
+    command: mongorestore --host=172.16.0.2 --db=datawhore -u erratik -p kaya80ate /data/heroku_10tzj082
 
   # Distributed in-memory cache
   redis:
@@ -92,6 +95,7 @@ services:
       # - GOOGLE_SECRET=xxxxx
       # - TWITTER_KEY=xxxxx
       # - TWITTER_SECRET=xxxxx
+    user: "root:root"
     ports:
       - "10010:10010"
       - "127.0.0.1:9229:9229" # V8 inspector for tools/run.js
@@ -111,7 +115,7 @@ services:
       - ./package.json:/usr/src/app/package.json
       - ./yarn.lock:/usr/src/app/yarn.lock
     # command: "node tools/run.js" # or, `node --inspect=0.0.0.0:9229 tools/run.js`
-    command: node --inspect=0.0.0.0:9229 tools/run.js
+    command: "node --inspect=0.0.0.0:9229 tools/run.js"
 
 
 volumes:

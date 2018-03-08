@@ -31,6 +31,31 @@ process.on('SIGTERM', () => process.emit('cleanup'));
 
 // Install Node.js modules with Yarn
 cp.spawnSync('yarn', ['install', '--no-progress'], { stdio: 'inherit' });
+cp.spawnSync(
+  'npm',
+  [
+    'i',
+    '-g',
+    'babel-cli',
+    'babel-plugin-transform-regenerator',
+    'del',
+    '--no-save',
+  ],
+  { stdio: 'inherit' },
+);
+cp.spawnSync('npm', ['i'], { stdio: 'inherit' });
+// cp.spawnSync('npm', ['i', '--no-save'], { stdio: 'inherit' });
+
+// cp.spawnSync('npm', ['i'], { stdio: 'inherit' });
+// cp.spawn(
+//   'babel',
+//   [
+//     '--plugins',
+//     'transform-regenerator',
+//     '/usr/src/app/node_modules/dataloader-mongoose/dist/dataLoaderMongoose.js',
+//   ],
+//   { stdio: 'inherit' },
+// );
 
 const build = require('./build');
 
@@ -64,12 +89,17 @@ function spawnServer() {
           ]),
     ],
     { cwd: './build', stdio: ['pipe', 'inherit', 'inherit'], timeout: 3000 },
-    // TODO: overriding the mongoose temp. do this in the docker-compose
   );
 }
 
 module.exports = task('run', () =>
   Promise.resolve()
+    // Make the Mongoose DataLoader work, since they not using babel plugins :(
+    .then(() => {
+      cp.spawnSync('sh', ['./tools/data-loader-fix.sh'], {
+        stdio: 'inherit',
+      });
+    })
     // Migrate database schema to the latest version
     .then(() => {
       cp.spawnSync('node', ['tools/db.js', 'migrate'], { stdio: 'inherit' });
@@ -93,7 +123,7 @@ module.exports = task('run', () =>
             server = serverQueue.splice(0, 1)[0] || spawnServer();
             server.stdin.write('load'); // this works faster than IPC
             if (server)
-              while (serverQueue.length < 3) serverQueue.push(spawnServer());
+              while (serverQueue.length < 6) serverQueue.push(spawnServer());
           }
         },
       }),

@@ -14,3 +14,4 @@ docker-compose.override.yml
 !.vscode/settings.json
 .history
 src/graphql/data-loaders/dataloader-mongoose/**/.git
+docker

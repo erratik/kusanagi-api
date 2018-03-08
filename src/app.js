@@ -7,6 +7,7 @@
 
 /* @flow */
 
+import 'babel-polyfill';
 import path from 'path';
 import express from 'express';
 import cors from 'cors';
@@ -31,7 +32,7 @@ import passport from './passport';
 import accountRoutes from './routes/account';
 // import schema from './schema';
 import schema from './graphql';
-import Context from './graphql/data-loaders/data-loaders';
+import Context from './graphql/loaders/data-loaders';
 import errors from './errors';
 
 i18next
