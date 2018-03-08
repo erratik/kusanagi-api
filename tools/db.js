@@ -7,14 +7,14 @@
  */
 
 // const fs = require('fs');
-const knex = require('knex');
+// const knex = require('knex');
 const task = require('./task');
 
 // The list of available commands, e.g. node tools/db.js rollback
 const commands = ['version', 'migrate', 'rollback', 'migration', 'seed'];
 const command = process.argv[2];
 
-const config = {};
+// const config = {};
 
 // The template for database migration files (see templates/*.js)
 // const version = new Date().toISOString().substr(0, 16).replace(/\D/g, '');
@@ -49,8 +49,9 @@ module.exports = task('db', async () => {
       //   // await db.seed.run(config);
       //   break;
       default:
-        db = knex(config);
+        // db = knex(config);
         await db;
+      // console.log(db);
     }
   } finally {
     if (db) {

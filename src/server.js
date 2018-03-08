@@ -9,7 +9,7 @@
 /* eslint-disable no-console, no-shadow, import/no-named-as-default */
 
 import app from './app';
-import db from './db';
+import { mongoCXN } from './db';
 import redis from './redis';
 import errors from './errors';
 
@@ -17,15 +17,17 @@ const port = process.env.PORT || 8080;
 const host = process.env.HOSTNAME || '0.0.0.0';
 
 // Launch Node.js server
-app.listen(host, port, () => {
-  console.log(`Node.js API server is listening on http://${host}:${port}/`);
+const server = app.listen(port, () => {
+  console.log(`👂  node.js API server is listening on http://${host}:${port}/`);
 });
+// db().then(db => console.log(db));
 
 // Shutdown Node.js app gracefully
-function handleExit(options, err) {
+async function handleExit(options, err) {
   if (options.cleanup) {
-    const actions = [db.close, redis.quit];
+    const actions = [server.close, mongoCXN.close, redis.quit];
     actions.forEach((close, i) => {
+      console.log(`☠ exiting (${i})...`);
       try {
         close(() => {
           if (i === actions.length - 1) process.exit();

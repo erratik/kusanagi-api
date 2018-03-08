@@ -1,5 +1,9 @@
 /**
+<<<<<<< HEAD
  * Copyright © 2016-present Kriasoft.
+=======
+ * Copyright © 2018-present @erratik
+>>>>>>> [kusanagi-api] deleted my git history like a moron...; mongo works, working with the dataloader & graphql now
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE.txt file in the root directory of this source tree.
@@ -7,6 +11,7 @@
 
 /* @flow */
 
+<<<<<<< HEAD
 const MongoClient = require('mongodb').MongoClient;
 const Server = require('mongodb').Server;
 
@@ -112,3 +117,62 @@ export default db;
 
 // // // knex query builder object
 // // const knexQuery = knex('movies');
+=======
+import { Logger } from 'mongodb';
+import mongoose from 'mongoose';
+
+const MONGO_URL = process.env.DATABASE_URL;
+
+const db = async () => {
+  console.log('🍃  connecting to mongoDB...');
+  const myDB = await mongoose
+    .connect(MONGO_URL)
+    .then(cnx => cnx.connections[0])
+    .then(dbx => {
+      let logCount = 0;
+      Logger.setCurrentLogger((msg, state) => {
+        logCount += 1;
+        console.log(`MONGO DB REQUEST ${logCount}: ${msg}`);
+      });
+      Logger.setLevel(process.env.NODE_ENV === 'staging' ? 'error' : 'debug');
+      Logger.filter('class', ['NativeCollection', 'Cursor']);
+
+      console.log('   📚  fetching collections...');
+      return Object.keys(dbx.collections).map(collectionName =>
+        dbx.collection(collectionName),
+      );
+    })
+    .then(collections => collections);
+
+  return {
+    collections: myDB,
+  };
+};
+
+const mongoDB = {};
+(async () => {
+  mongoDB.collections = await db().then(({ collections }) => {
+    const niceCollections = {};
+    for (let i = 0; i < collections.length; i++) {
+      niceCollections[collections[i].collectionName] = collections[i];
+    }
+    return niceCollections;
+  });
+  return new Promise(resolve => {
+    resolve(mongoDB.collections);
+    console.log('   🏁  done...');
+  });
+})();
+
+const mongoCXN = {
+  close: (cxn: any) => {
+    // Close connection
+    if (cxn) {
+      cxn.close();
+    }
+  },
+};
+
+export default db;
+export { mongoDB, mongoCXN };
+>>>>>>> [kusanagi-api] deleted my git history like a moron...; mongo works, working with the dataloader & graphql now

@@ -13,7 +13,7 @@ import passport from 'passport';
 // import { Strategy as FacebookStrategy } from 'passport-facebook';
 // import { Strategy as TwitterStrategy } from 'passport-twitter';
 
-// import db from './data';
+// import { mongoDB } from './data';
 
 passport.serializeUser((user, done) => {
   done(null, {

@@ -13,7 +13,8 @@
     "transform-class-properties",
     "transform-export-extensions",
     "transform-flow-strip-types",
-    "transform-object-rest-spread"
+    "transform-object-rest-spread",
+    "transform-regenerator"
   ],
   "retainLines": true
 }

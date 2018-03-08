@@ -64,6 +64,7 @@ function spawnServer() {
           ]),
     ],
     { cwd: './build', stdio: ['pipe', 'inherit', 'inherit'], timeout: 3000 },
+    // TODO: overriding the mongoose temp. do this in the docker-compose
   );
 }
 

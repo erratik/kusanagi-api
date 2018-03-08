@@ -29,8 +29,9 @@ import email from './email';
 import redis from './redis';
 import passport from './passport';
 import accountRoutes from './routes/account';
-import schema from './schema';
-import Context from './Context';
+// import schema from './schema';
+import schema from './graphql';
+import Context from './graphql/data-loaders/data-loaders';
 import errors from './errors';
 
 i18next
